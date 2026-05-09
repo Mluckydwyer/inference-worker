@@ -20,15 +20,21 @@ def find_model_path(model_name, gguf_in_repo="model.gguf"):
     """
 
     cache_name = model_name.replace("/", "--").lower()
+    print(f"Cache Name: {cache_name}")
+    
     snapshots_dir = os.path.join(
         CACHE_DIR, f"models--{cache_name}", "snapshots"
     )
+    print(f"Snapshots Dir: {snapshots_dir}")
 
     if os.path.exists(snapshots_dir):
         snapshots = os.listdir(snapshots_dir)
+        print(f"Snapshots: {snapshots}")
 
         if snapshots:
-            return os.path.join(snapshots_dir, snapshots[0], gguf_in_repo)
+            cached_model = os.path.join(snapshots_dir, snapshots[0], gguf_in_repo)
+            print(f"Cached Model: {cached_model}")
+            return cached_model
 
     return None
 
@@ -51,7 +57,12 @@ def main():
     )
     args = parser.parse_args()
 
+    print(f"Model: {args.model}, Path: {args.path}")
     model_path = find_model_path(args.model, args.path)
+
+    if model_path is None:
+        print(f"Error: Cached model not found. Model='{args.model}', GGUF='{args.path}', Cache dir='{CACHE_DIR}'", file=sys.stderr)
+        sys.exit(1)
     print(model_path, end="")
 
 
